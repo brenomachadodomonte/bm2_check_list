@@ -1,22 +1,10 @@
 import 'package:flutter/material.dart';
+import 'check_list.dart';
 
 void main() => runApp(MaterialApp(
-  home: Home(),
+  home: CheckList(),
   theme: ThemeData(
-    primarySwatch: Colors.red,
+    primarySwatch: Colors.blue,
   ),
   debugShowCheckedModeBanner: false,
 ));
-
-class Home extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        child: Center(
-          child: Text('Coming Soon'),
-        ),
-      ),
-    );
-  }
-}
