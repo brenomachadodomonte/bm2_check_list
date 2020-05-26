@@ -73,7 +73,7 @@ class _CheckListState extends State<CheckList> {
               ),
               child: Column(
                 children: <Widget>[
-                  Text('Create amazing apps with flutter', style: TextStyle(decoration: myList[index]['decoration']),)
+                  Text(myList[index]['text'], style: TextStyle(decoration: myList[index]['decoration']),)
                 ],
               ),
               padding: EdgeInsets.all(16),
