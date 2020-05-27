@@ -8,6 +8,9 @@ class CheckList extends StatefulWidget {
 class _CheckListState extends State<CheckList> {
 
   GlobalKey<ScaffoldState> _key = GlobalKey();
+  var controllerItem = TextEditingController();
+
+  GlobalKey<FormState> _formKeyAdd = GlobalKey<FormState>();
 
   List myList =  List.generate(20, (index){
     return {
@@ -19,6 +22,9 @@ class _CheckListState extends State<CheckList> {
 
   @override
   Widget build(BuildContext context) {
+
+    double width = MediaQuery.of(context).size.width - 10;
+
     return Scaffold(
       key: _key,
       appBar: AppBar(
@@ -37,20 +43,20 @@ class _CheckListState extends State<CheckList> {
         child: ListView.builder(
           itemCount: myList.length,
           itemBuilder: (context, index) {
-            return _row(index);
+            return _row(index, width);
           },
         ),
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add, color: Colors.white,),
         onPressed: (){
-          //TODO: Show dialog to add Item List
+          _showDialogAddItem(context);
         },
       ),
     );
   }
 
-  _row(int index){
+  _row(int index, double width){
     return Dismissible(
       key: UniqueKey(),
       background: Container(color: Colors.grey),
@@ -63,32 +69,28 @@ class _CheckListState extends State<CheckList> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
-            Flexible(
-              flex: 1,
-              child: Container(
-                child: Text((index+1).toString()),
-                width: 50,
-                padding: EdgeInsets.all(16),
-              ),
+            Container(
+              child: Text((index+1).toString()),
+              width: width * 0.2,
+              padding: EdgeInsets.all(16),
             ),
-            Flexible(
-              flex: 4,
-              child: Container(
-                decoration: BoxDecoration(
-                    border: Border(
-                        left: BorderSide(color: Color.fromARGB(255, 218, 37, 30))
-                    )
-                ),
-                child: Column(
-                  children: <Widget>[
-                    Text(myList[index]['text'], style: TextStyle(decoration: myList[index]['decoration']),)
-                  ],
-                ),
-                padding: EdgeInsets.all(16),
+            Container(
+              width: width * 0.6,
+              decoration: BoxDecoration(
+                  border: Border(
+                      left: BorderSide(color: Color.fromARGB(255, 218, 37, 30))
+                  )
               ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(myList[index]['text'], style: TextStyle(decoration: myList[index]['decoration']),)
+                ],
+              ),
+              padding: EdgeInsets.all(16),
             ),
-            Flexible(
-              flex: 1,
+            Container(
+              width: width * 0.2,
               child: Checkbox(
                 value: myList[index]['checked'],
                 onChanged: (value){
@@ -98,14 +100,12 @@ class _CheckListState extends State<CheckList> {
                   });
                 },
               ),
-            ),
+            )
           ],
         ),
       ),
       onDismissed: (orientation){
-        print(index);
         setState(() {
-          // added this block
           Map deletedItem = myList.removeAt(index);
           _key.currentState
             ..removeCurrentSnackBar()
@@ -119,6 +119,84 @@ class _CheckListState extends State<CheckList> {
               ),
             );
         });
+      },
+    );
+  }
+
+  void _showDialogAddItem(BuildContext context){
+    controllerItem.text = '';
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          title: Text("Add Item"),
+          content: Container(
+            child: Form(
+              key: _formKeyAdd,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Flexible(
+                    child: TextFormField(
+                      controller: controllerItem,
+                      decoration: InputDecoration(
+                        labelText: 'Item',
+                        labelStyle: TextStyle(color: Colors.grey[700]),
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (value) {
+                        if(value.isEmpty){
+                          return "Item is required!";
+                        }
+                        return null;
+                      }
+                    ),
+                  ),
+                  Divider(),
+                  Row(
+                    children: <Widget>[
+                      Expanded(
+                        flex: 1,
+                        child: FlatButton(
+                          child: Text(
+                            "CLOSE",
+                            style: TextStyle(color: Theme.of(context).primaryColor),
+                          ),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ),
+                      Expanded(
+                        flex: 1,
+                        child: FlatButton(
+                          child: Text(
+                            "ADD",style: TextStyle(color: Theme.of(context).primaryColor),
+                          ),
+                          onPressed: () {
+                            if(_formKeyAdd.currentState.validate()){
+                              Map item = {
+                                'text': controllerItem.text,
+                                'checked':false,
+                                'decoration':TextDecoration.none
+                              };
+                              setState(() {
+                                myList.add(item);
+                              });
+                              Navigator.of(context).pop();
+                            }
+                          },
+                        ),
+                      )
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
       },
     );
   }
