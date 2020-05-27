@@ -140,8 +140,10 @@ class _CheckListState extends State<CheckList> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  Flexible(
-                    child: TextFormField(
+                  TextFormField(
+                      autofocus: true,
+                      minLines: 2,
+                      maxLines: 5,
                       controller: controllerItem,
                       decoration: InputDecoration(
                         labelText: 'Item',
@@ -154,7 +156,6 @@ class _CheckListState extends State<CheckList> {
                         }
                         return null;
                       }
-                    ),
                   ),
                   Divider(),
                   Row(
