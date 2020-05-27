@@ -23,7 +23,6 @@ class _CheckListState extends State<CheckList> {
   }
 
   _loadDataList() {
-    print('loaded');
     db.loadData().then((data) {
       setState(() {
         myList = data;
@@ -32,7 +31,6 @@ class _CheckListState extends State<CheckList> {
   }
 
   _saveDataList(){
-    print('saved');
     db.saveData(myList).then((_){
       _loadDataList();
     });
