@@ -12,13 +12,7 @@ class _CheckListState extends State<CheckList> {
 
   GlobalKey<FormState> _formKeyAdd = GlobalKey<FormState>();
 
-  List myList =  List.generate(20, (index){
-    return {
-      'text':'Create amazing apps in flutter',
-      'checked':false,
-      'decoration':TextDecoration.none
-    };
-  });
+  List myList = [];
 
   @override
   Widget build(BuildContext context) {
@@ -37,8 +31,8 @@ class _CheckListState extends State<CheckList> {
           ],
         ),
       ),
-      body: Container(
-        color: Color.fromARGB(255, 255, 254, 226),
+      backgroundColor: Color.fromARGB(255, 255, 254, 226),
+      body: (myList.length == 0) ? _emptyList() : Container(
         padding: EdgeInsets.all(5),
         child: ListView.builder(
           itemCount: myList.length,
@@ -52,6 +46,14 @@ class _CheckListState extends State<CheckList> {
         onPressed: (){
           _showDialogAddItem(context);
         },
+      ),
+    );
+  }
+
+  _emptyList() {
+    return Container(
+      child: Center(
+        child: Text('You don\'t have items in your list')
       ),
     );
   }
