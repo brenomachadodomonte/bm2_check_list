@@ -7,16 +7,20 @@ class CheckList extends StatefulWidget {
 
 class _CheckListState extends State<CheckList> {
 
+  GlobalKey<ScaffoldState> _key = GlobalKey();
+
   List myList =  List.generate(20, (index){
     return {
       'text':'Create amazing apps in flutter',
       'checked':false,
-      'decoration':TextDecoration.none};
+      'decoration':TextDecoration.none
+    };
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _key,
       appBar: AppBar(
         backgroundColor: Color.fromARGB(255, 255, 254, 226),
         title: Row(
@@ -30,10 +34,11 @@ class _CheckListState extends State<CheckList> {
       body: Container(
         color: Color.fromARGB(255, 255, 254, 226),
         padding: EdgeInsets.all(5),
-        child: ListView(
-          children: List.generate(20, (index){
+        child: ListView.builder(
+          itemCount: myList.length,
+          itemBuilder: (context, index) {
             return _row(index);
-          }),
+          },
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -46,53 +51,75 @@ class _CheckListState extends State<CheckList> {
   }
 
   _row(int index){
-    return Container(
-      decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(color: Color.fromARGB(255, 0, 147, 221), width: 1.2),
-          )
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: <Widget>[
-          Flexible(
-            flex: 1,
-            child: Container(
-              child: Text(index.toString()),
-              width: 50,
-              padding: EdgeInsets.all(16),
-            ),
-          ),
-          Flexible(
-            flex: 4,
-            child: Container(
-              decoration: BoxDecoration(
-                  border: Border(
-                      left: BorderSide(color: Color.fromARGB(255, 218, 37, 30))
-                  )
+    return Dismissible(
+      key: UniqueKey(),
+      background: Container(color: Colors.grey),
+      child: Container(
+        decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(color: Color.fromARGB(255, 0, 147, 221), width: 1.2),
+            )
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: <Widget>[
+            Flexible(
+              flex: 1,
+              child: Container(
+                child: Text((index+1).toString()),
+                width: 50,
+                padding: EdgeInsets.all(16),
               ),
-              child: Column(
-                children: <Widget>[
-                  Text(myList[index]['text'], style: TextStyle(decoration: myList[index]['decoration']),)
-                ],
+            ),
+            Flexible(
+              flex: 4,
+              child: Container(
+                decoration: BoxDecoration(
+                    border: Border(
+                        left: BorderSide(color: Color.fromARGB(255, 218, 37, 30))
+                    )
+                ),
+                child: Column(
+                  children: <Widget>[
+                    Text(myList[index]['text'], style: TextStyle(decoration: myList[index]['decoration']),)
+                  ],
+                ),
+                padding: EdgeInsets.all(16),
               ),
-              padding: EdgeInsets.all(16),
             ),
-          ),
-          Flexible(
-            flex: 1,
-            child: Checkbox(
-              value: myList[index]['checked'],
-              onChanged: (value){
-                setState(() {
-                  myList[index]['checked'] = value;
-                  myList[index]['decoration'] = value ? TextDecoration.lineThrough : TextDecoration.none;
-                });
-              },
+            Flexible(
+              flex: 1,
+              child: Checkbox(
+                value: myList[index]['checked'],
+                onChanged: (value){
+                  setState(() {
+                    myList[index]['checked'] = value;
+                    myList[index]['decoration'] = value ? TextDecoration.lineThrough : TextDecoration.none;
+                  });
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
+      onDismissed: (orientation){
+        print(index);
+        setState(() {
+          // added this block
+          Map deletedItem = myList.removeAt(index);
+          _key.currentState
+            ..removeCurrentSnackBar()
+            ..showSnackBar(
+              SnackBar(
+                content: Text("Item ${index+1} Deleted"),
+                action: SnackBarAction(
+                    label: "UNDO",
+                    onPressed: () => setState(() => myList.insert(index, deletedItem),) // this is what you needed
+                ),
+              ),
+            );
+        });
+      },
     );
   }
 
