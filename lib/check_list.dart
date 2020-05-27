@@ -1,3 +1,4 @@
+import 'package:checklist/util/storage.dart';
 import 'package:flutter/material.dart';
 
 class CheckList extends StatefulWidget {
@@ -13,6 +14,29 @@ class _CheckListState extends State<CheckList> {
   GlobalKey<FormState> _formKeyAdd = GlobalKey<FormState>();
 
   List myList = [];
+  Storage db = Storage();
+
+  @override
+  void initState() {
+      super.initState();
+      _loadDataList();
+  }
+
+  _loadDataList() {
+    print('loaded');
+    db.loadData().then((data) {
+      setState(() {
+        myList = data;
+      });
+    });
+  }
+
+  _saveDataList(){
+    print('saved');
+    db.saveData(myList).then((_){
+      _loadDataList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +110,7 @@ class _CheckListState extends State<CheckList> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text(myList[index]['text'], style: TextStyle(decoration: myList[index]['decoration']),)
+                  Text(myList[index]['text'], style: TextStyle(decoration: myList[index]['checked'] ? TextDecoration.lineThrough : TextDecoration.none),)
                 ],
               ),
               padding: EdgeInsets.all(16),
@@ -96,10 +120,8 @@ class _CheckListState extends State<CheckList> {
               child: Checkbox(
                 value: myList[index]['checked'],
                 onChanged: (value){
-                  setState(() {
-                    myList[index]['checked'] = value;
-                    myList[index]['decoration'] = value ? TextDecoration.lineThrough : TextDecoration.none;
-                  });
+                  myList[index]['checked'] = value;
+                  _saveDataList();
                 },
               ),
             )
@@ -109,14 +131,18 @@ class _CheckListState extends State<CheckList> {
       onDismissed: (orientation){
         setState(() {
           Map deletedItem = myList.removeAt(index);
+          _saveDataList();
           _key.currentState
             ..removeCurrentSnackBar()
             ..showSnackBar(
               SnackBar(
                 content: Text("Item ${index+1} Deleted"),
                 action: SnackBarAction(
-                    label: "UNDO",
-                    onPressed: () => setState(() => myList.insert(index, deletedItem),) // this is what you needed
+                  label: "UNDO",
+                  onPressed: (){
+                    myList.insert(index, deletedItem);
+                    _saveDataList();
+                  } // this is what you needed
                 ),
               ),
             );
@@ -183,11 +209,9 @@ class _CheckListState extends State<CheckList> {
                               Map item = {
                                 'text': controllerItem.text,
                                 'checked':false,
-                                'decoration':TextDecoration.none
                               };
-                              setState(() {
-                                myList.add(item);
-                              });
+                              myList.add(item);
+                              _saveDataList();
                               Navigator.of(context).pop();
                             }
                           },
